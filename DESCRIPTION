@@ -1,6 +1,6 @@
 Package: SummarizedExperiment7
 Title: An S7 Implementation of the SummarizedExperiment Data Structure
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: person("Vincent", "Carey", email = "stvjc@channing.harvard.edu",
     role = c("aut", "cre"))
 Description: A from-scratch implementation of the SummarizedExperiment and
