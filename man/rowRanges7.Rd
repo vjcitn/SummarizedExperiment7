@@ -5,9 +5,9 @@
 \alias{rowRanges7<-}
 \title{Get or set the per-feature ranges of a \code{RangedSummarizedExperiment7}}
 \usage{
-rowRanges7(x, ...)
+rowRanges7(x)
 
-rowRanges7(x, ...) <- value
+rowRanges7(x) <- value
 }
 \arguments{
 \item{x}{A \code{RangedSummarizedExperiment7}.}

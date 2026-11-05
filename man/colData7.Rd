@@ -5,9 +5,9 @@
 \alias{colData7<-}
 \title{Get or set the per-sample (column) annotation table}
 \usage{
-colData7(x, ...)
+colData7(x)
 
-colData7(x, ...) <- value
+colData7(x) <- value
 }
 \arguments{
 \item{x}{A \code{SummarizedExperiment7}.}

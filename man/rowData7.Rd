@@ -5,9 +5,9 @@
 \alias{rowData7<-}
 \title{Get or set the per-feature (row) annotation table}
 \usage{
-rowData7(x, ...)
+rowData7(x)
 
-rowData7(x, ...) <- value
+rowData7(x) <- value
 }
 \arguments{
 \item{x}{A \code{SummarizedExperiment7}.}

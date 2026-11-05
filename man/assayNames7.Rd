@@ -4,7 +4,7 @@
 \alias{assayNames7}
 \title{Get the names of the assays}
 \usage{
-assayNames7(x, ...)
+assayNames7(x)
 }
 \arguments{
 \item{x}{A \code{SummarizedExperiment7}.}

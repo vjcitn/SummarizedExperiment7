@@ -111,12 +111,12 @@ duck_names <- function(r) {
 #' rowRanges7(rse)
 #'
 #' @export
-rowRanges7 <- S7::new_generic("rowRanges7", "x")
+rowRanges7 <- S7::new_generic("rowRanges7", "x", function(x) S7::S7_dispatch())
 S7::method(rowRanges7, RangedSummarizedExperiment7) <- function(x) x@row_ranges
 
 #' @rdname rowRanges7
 #' @export
-`rowRanges7<-` <- S7::new_generic("rowRanges7<-", "x")
+`rowRanges7<-` <- S7::new_generic("rowRanges7<-", "x", function(x, value) S7::S7_dispatch())
 S7::method(`rowRanges7<-`, RangedSummarizedExperiment7) <- function(x, value) {
   if (length(value) != nrow(x)) {
     stop2("length(value) must equal nrow(x); use toRangedSummarizedExperiment7() to replace an incompatible rowRanges")

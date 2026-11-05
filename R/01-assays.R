@@ -8,6 +8,11 @@
 #' ordered list of matrix- or array-like measurement objects that all
 #' agree on `dim()[1:2]` (clauses `SE-INV-1`/`SE-INV-2`).
 #'
+#' @param data A list of matrix- or array-like objects, all sharing the
+#'   same `dim()[1:2]`.
+#' @param assay_names Optional character vector of names for the
+#'   elements of `data`, the same length as `data`.
+#'
 #' @examples
 #' m1 <- matrix(1:6, nrow = 2, ncol = 3)
 #' m2 <- matrix(7:12, nrow = 2, ncol = 3)
@@ -15,6 +20,7 @@
 #' dim(a)
 #' length(a)
 #'
+#' @name Assays7-class
 #' @export
 Assays7 <- S7::new_class(
   "Assays7",

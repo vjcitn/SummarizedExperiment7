@@ -5,9 +5,9 @@
 \alias{assays7<-}
 \title{Get or set the list of assays}
 \usage{
-assays7(x, ...)
+assays7(x)
 
-assays7(x, ...) <- value
+assays7(x) <- value
 }
 \arguments{
 \item{x}{A \code{SummarizedExperiment7}.}

@@ -167,7 +167,7 @@ S7::method(`names<-`, SummarizedExperiment7) <- function(x, value) {
 #' assayNames7(se)
 #'
 #' @export
-assays7 <- S7::new_generic("assays7", "x")
+assays7 <- S7::new_generic("assays7", "x", function(x) S7::S7_dispatch())
 S7::method(assays7, SummarizedExperiment7) <- function(x) {
   if (is.null(x@assays)) list() else {
     nms <- x@assays@assay_names
@@ -179,7 +179,7 @@ S7::method(assays7, SummarizedExperiment7) <- function(x) {
 
 #' @rdname assays7
 #' @export
-`assays7<-` <- S7::new_generic("assays7<-", "x")
+`assays7<-` <- S7::new_generic("assays7<-", "x", function(x, value) S7::S7_dispatch())
 S7::method(`assays7<-`, SummarizedExperiment7) <- function(x, value) {
   x@assays <- as_assays7(value)
   x
@@ -200,7 +200,7 @@ S7::method(`assays7<-`, SummarizedExperiment7) <- function(x, value) {
 #' assayNames7(se)
 #'
 #' @export
-assay7 <- S7::new_generic("assay7", "x")
+assay7 <- S7::new_generic("assay7", "x", function(x, i = 1L) S7::S7_dispatch())
 S7::method(assay7, SummarizedExperiment7) <- function(x, i = 1L) {
   if (is.null(x@assays) || length(x@assays@data) == 0) {
     stop2("no assays present")
@@ -212,7 +212,7 @@ S7::method(assay7, SummarizedExperiment7) <- function(x, i = 1L) {
 
 #' @rdname assay7
 #' @export
-`assay7<-` <- S7::new_generic("assay7<-", "x")
+`assay7<-` <- S7::new_generic("assay7<-", "x", function(x, i = 1L, value) S7::S7_dispatch())
 S7::method(`assay7<-`, SummarizedExperiment7) <- function(x, i = 1L, value) {
   a <- x@assays
   if (is.null(a)) a <- Assays7()
@@ -242,7 +242,7 @@ S7::method(`assay7<-`, SummarizedExperiment7) <- function(x, i = 1L, value) {
 #' assayNames7(se)
 #'
 #' @export
-assayNames7 <- S7::new_generic("assayNames7", "x")
+assayNames7 <- S7::new_generic("assayNames7", "x", function(x) S7::S7_dispatch())
 S7::method(assayNames7, SummarizedExperiment7) <- function(x) {
   if (is.null(x@assays)) NULL else x@assays@assay_names
 }
@@ -262,12 +262,12 @@ S7::method(assayNames7, SummarizedExperiment7) <- function(x) {
 #' rowData7(se)
 #'
 #' @export
-rowData7 <- S7::new_generic("rowData7", "x")
+rowData7 <- S7::new_generic("rowData7", "x", function(x) S7::S7_dispatch())
 S7::method(rowData7, SummarizedExperiment7) <- function(x) x@row_data
 
 #' @rdname rowData7
 #' @export
-`rowData7<-` <- S7::new_generic("rowData7<-", "x")
+`rowData7<-` <- S7::new_generic("rowData7<-", "x", function(x, value) S7::S7_dispatch())
 S7::method(`rowData7<-`, SummarizedExperiment7) <- function(x, value) {
   x@row_data <- value
   x
@@ -286,12 +286,12 @@ S7::method(`rowData7<-`, SummarizedExperiment7) <- function(x, value) {
 #' colnames(se)
 #'
 #' @export
-colData7 <- S7::new_generic("colData7", "x")
+colData7 <- S7::new_generic("colData7", "x", function(x) S7::S7_dispatch())
 S7::method(colData7, SummarizedExperiment7) <- function(x) x@col_data
 
 #' @rdname colData7
 #' @export
-`colData7<-` <- S7::new_generic("colData7<-", "x")
+`colData7<-` <- S7::new_generic("colData7<-", "x", function(x, value) S7::S7_dispatch())
 S7::method(`colData7<-`, SummarizedExperiment7) <- function(x, value) {
   rn <- rownames(x@col_data)
   x@col_data <- value
@@ -310,12 +310,12 @@ S7::method(`colData7<-`, SummarizedExperiment7) <- function(x, value) {
 #' metadata7(se)
 #'
 #' @export
-metadata7 <- S7::new_generic("metadata7", "x")
+metadata7 <- S7::new_generic("metadata7", "x", function(x) S7::S7_dispatch())
 S7::method(metadata7, SummarizedExperiment7) <- function(x) x@metadata
 
 #' @rdname metadata7
 #' @export
-`metadata7<-` <- S7::new_generic("metadata7<-", "x")
+`metadata7<-` <- S7::new_generic("metadata7<-", "x", function(x, value) S7::S7_dispatch())
 S7::method(`metadata7<-`, SummarizedExperiment7) <- function(x, value) {
   x@metadata <- value
   x
@@ -391,6 +391,12 @@ se7_cbind <- function(...) {
   )
 }
 
+# S7::method<- on the internal generics rbind/cbind binds R's own
+# .Internal()-calling rbind/cbind into this namespace (that's how S7 hooks
+# dispatch for them); R CMD check's "R code for possible problems" flags
+# the resulting .Internal calls as if this package wrote them. This is
+# inherent to implementing methods for these two base internal generics
+# and not fixable from the method body below.
 S7::method(rbind, SummarizedExperiment7) <- function(..., deparse.level = 1) se7_rbind(...)
 S7::method(cbind, SummarizedExperiment7) <- function(..., deparse.level = 1) se7_cbind(...)
 

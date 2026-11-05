@@ -5,9 +5,9 @@
 \alias{metadata7<-}
 \title{Get or set experiment-wide metadata}
 \usage{
-metadata7(x, ...)
+metadata7(x)
 
-metadata7(x, ...) <- value
+metadata7(x) <- value
 }
 \arguments{
 \item{x}{A \code{SummarizedExperiment7}.}
