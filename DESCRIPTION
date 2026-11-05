@@ -1,0 +1,29 @@
+Package: SummarizedExperiment7
+Title: An S7 Implementation of the SummarizedExperiment Data Structure
+Version: 0.0.1
+Authors@R: person("Vincent", "Carey", email = "stvjc@channing.harvard.edu",
+    role = c("aut", "cre"))
+Description: A from-scratch implementation of the SummarizedExperiment and
+    RangedSummarizedExperiment data structures using the 'S7' object system
+    rather than Bioconductor's S4 class system. The class contracts
+    (constructors, accessors, validators, slicing, and combining rules)
+    follow the language-agnostic 'biocspec' specification for
+    SummarizedExperiment rather than the R/Bioconductor S4 source, so this
+    package is conformant with that specification without necessarily
+    replicating every implementation detail of the S4 original (notably,
+    there is no automatic class promotion/demotion on 'rowRanges<-'; use
+    'toRangedSummarizedExperiment7()' and 'toSummarizedExperiment7()'
+    instead).
+License: Artistic-2.0
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+Imports:
+    S7,
+    methods,
+    stats
+Suggests:
+    testthat (>= 3.0.0),
+    S4Vectors,
+    GenomicRanges
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.1
