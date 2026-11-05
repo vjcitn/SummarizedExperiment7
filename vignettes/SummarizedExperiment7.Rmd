@@ -23,15 +23,14 @@ Two things make this package unusual, and worth stating plainly before using it:
   has had.
 - **It targets a specification, not the S4 source.** Rather than porting
   Bioconductor's S4 implementation, this package was built to conform to
-  [biocspec](https://github.com/vjcitn/BOSS/tree/main/biocspec)'s
-  language-agnostic specification for `SummarizedExperiment`
+  [biocspec](https://github.com/biocspec)'s language-agnostic specification for `SummarizedExperiment`
   (`SummarizedExperiment-specification.md`). That specification describes
   the *contract* -- what a constructor, accessor, or combining operation
   must guarantee -- independent of R, S4, or any particular language's
   object system. biocspec also ships a formal conformance test suite
   (`summarized_experiment_conformance.yaml`); this package includes an
-  adapted runner for it (`conformance/run_conformance_se7.R`) covering the
-  cases that are in scope for its API (see below).
+  adapted runner for it (`inst/conformance/run_conformance_se7.R`)
+  covering the cases that are in scope for its API (see below).
 
 Treat this package as a demonstration that a biocspec-conformant
 `SummarizedExperiment` can be built outside of S4, not as a drop-in
