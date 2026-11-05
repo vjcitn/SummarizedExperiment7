@@ -38,6 +38,48 @@ test_that("toSummarizedExperiment7()/toRangedSummarizedExperiment7() reject non-
   expect_error(toRangedSummarizedExperiment7(1:3, rowRanges = list(1, 2)))
 })
 
+test_that("cbind() unions rowRanges mcols() across objects and rejects mismatched range coordinates (SE-CBIND-1, conformance SE-CBIND-001/002)", {
+  skip_if_not_installed("GenomicRanges")
+  skip_if_not_installed("S4Vectors")
+  skip_if_not_installed("IRanges")
+
+  gr1 <- GenomicRanges::GRanges(
+    seqnames = c("chr1", "chr2"),
+    ranges = IRanges::IRanges(start = c(100, 500), width = c(50, 100)),
+    strand = c("+", "-")
+  )
+  names(gr1) <- c("g1", "g2")
+  S4Vectors::mcols(gr1) <- S4Vectors::DataFrame(symbol = c("A", "B"))
+  rse1 <- RangedSummarizedExperiment7(
+    assays = matrix(c(1, 3, 2, 4), 2, 2), rowRanges = gr1,
+    colData = data.frame(trt = c("ctrl", "trt"), row.names = c("s1", "s2"))
+  )
+
+  gr2 <- gr1
+  S4Vectors::mcols(gr2) <- S4Vectors::DataFrame(symbol = c("A", "B"), biotype = c("pc", "lnc"))
+  rse2 <- RangedSummarizedExperiment7(
+    assays = matrix(c(5, 6), 2, 1), rowRanges = gr2,
+    colData = data.frame(trt = c("ctrl"), row.names = c("s3"))
+  )
+
+  bound <- cbind(rse1, rse2)
+  expect_identical(dim(bound), c(2L, 3L))
+  expect_identical(colnames(bound), c("s1", "s2", "s3"))
+  expect_identical(as.character(rowData7(bound)$biotype), c("pc", "lnc"))
+
+  gr3 <- GenomicRanges::GRanges(
+    seqnames = c("chr1", "chr2"),
+    ranges = IRanges::IRanges(start = c(999, 500), width = c(50, 100)),
+    strand = c("+", "-")
+  )
+  names(gr3) <- c("g1", "g2")
+  rse3 <- RangedSummarizedExperiment7(
+    assays = matrix(c(5, 6), 2, 1), rowRanges = gr3,
+    colData = data.frame(trt = c("ctrl"), row.names = c("s3"))
+  )
+  expect_error(cbind(rse1, rse3))
+})
+
 test_that("rowRanges7<- requires matching length and does not promote/demote the class", {
   rse <- RangedSummarizedExperiment7(assays = m1, rowRanges = list(1, 2))
   rowRanges7(rse) <- list(10, 20)

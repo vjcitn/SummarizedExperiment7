@@ -1,33 +1,3 @@
-# Adapted conformance runner against biocspec's own formal conformance suite
-# (bioconductor/biocspec conformance/summarized_experiment_conformance.yaml,
-# suite version 0.1.0, 28 cases), translated to this package's S7 API.
-#
-# This is NOT a line-for-line port of biocspec's run_conformance_r.R (which
-# builds real S4 SummarizedExperiment objects): each of the 16 in-scope
-# cases below is hand-translated to call SummarizedExperiment7()/
-# RangedSummarizedExperiment7() and this package's own accessors, using the
-# same `given`/`when`/`then` values from the YAML case.
-#
-# 12 of the 28 cases are out of scope and not attempted: SE7 deliberately
-# does not implement withDimnames (CTOR-004, DIMNAMES-001/002/003),
-# checkDimnames (CTOR-005/006), a unified rowData+rowRanges constructor
-# (CTOR-007), combineRows/combineCols with fill (COMBROWS-001/COMBCOLS-001),
-# automatic class promotion/demotion (RSE-COERCE-001), range algebra
-# delegation (RSE-RANGE-001), or seqinfo pruning (RSE-SEQINFO-001) -- see
-# R/03-RangedSummarizedExperiment.R's header comment for the rationale.
-#
-# Last run result: 13/16 in-scope cases pass. 3 confirmed real failures:
-#   SE-RBIND-001 - rbind() keeps only the first object's colData instead of
-#     unioning colData columns across objects (se7_rbind() in
-#     R/02-SummarizedExperiment.R does not merge colData at all).
-#   SE-CBIND-001 - cbind() does not merge/union rowRanges mcols() across
-#     objects (se7_cbind.RangedSummarizedExperiment7 keeps only the first
-#     object's row_ranges/mcols).
-#   SE-CBIND-002 - cbind()'s compatibility check on RangedSummarizedExperiment7
-#     only compares rowRanges names/length, not actual range identity
-#     (start/width/strand), so objects with the same names but different
-#     coordinates are silently combined instead of rejected.
-
 options(error = NULL)
 devtools::load_all("/Users/vincentcarey/SAFE_CLAUDE/SummarizedExperiment7", quiet = TRUE)
 

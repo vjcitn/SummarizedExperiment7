@@ -364,7 +364,7 @@ se7_rbind <- function(...) {
     assays = new_assays,
     rowNames = unlist(lapply(objects, function(o) o@row_names)),
     rowData = table_rbind(lapply(objects, function(o) o@row_data)),
-    colData = objects[[1]]@col_data,
+    colData = table_merge_cols(lapply(objects, function(o) o@col_data)),
     metadata = objects[[1]]@metadata
   )
 }

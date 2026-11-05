@@ -76,3 +76,32 @@ test_that("rowData7<-/colData7<-/metadata7<- mutate in place", {
   metadata7(se) <- list(study = "demo")
   expect_identical(metadata7(se)$study, "demo")
 })
+
+test_that("rbind() unions colData columns across objects instead of keeping only the first (SE-RBIND-1/3, conformance SE-RBIND-001)", {
+  se1 <- SummarizedExperiment7(
+    assays = list(counts = matrix(c(1, 3, 2, 4), 2, 2)),
+    rowNames = c("g1", "g2"),
+    colData = data.frame(batch = c("b1", "b1"), donor = c("d1", "d2"), row.names = c("s1", "s2"))
+  )
+  se2 <- SummarizedExperiment7(
+    assays = list(counts = matrix(c(5, 6), 1, 2)),
+    rowNames = c("g3"),
+    colData = data.frame(batch = c("b1", "b1"), tissue = c("lung", "lung"), row.names = c("s1", "s2"))
+  )
+  r <- rbind(se1, se2)
+  cd <- colData7(r)
+  expect_identical(cd$donor, c("d1", "d2"))
+  expect_identical(cd$tissue, c("lung", "lung"))
+})
+
+test_that("rbind() still rejects conflicting duplicate colData columns (SE-RBIND-3, conformance SE-RBIND-002)", {
+  se1 <- SummarizedExperiment7(
+    assays = matrix(c(1, 2), 1, 2),
+    colData = data.frame(batch = c("b1", "b1"), row.names = c("s1", "s2"))
+  )
+  se2 <- SummarizedExperiment7(
+    assays = matrix(c(3, 4), 1, 2),
+    colData = data.frame(batch = c("CONFLICT_1", "CONFLICT_2"), row.names = c("s1", "s2"))
+  )
+  expect_error(rbind(se1, se2))
+})

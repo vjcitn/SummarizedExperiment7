@@ -190,18 +190,35 @@ S7::method(rbind, RangedSummarizedExperiment7) <- function(..., deparse.level = 
   RangedSummarizedExperiment7(
     assays = new_assays,
     rowRanges = combined_ranges,
-    colData = objects[[1]]@col_data,
+    colData = table_merge_cols(lapply(objects, function(o) o@col_data)),
     metadata = objects[[1]]@metadata
   )
+}
+
+# Compares the ranges themselves (seqnames/start/width/strand via
+# GenomicRanges::granges(), which drops mcols), not just names/length, so
+# that cbind() rejects objects whose coordinates differ even when their
+# names and length happen to match (clause SE-CBIND-1). Falls back to
+# all.equal() for duck-typed non-GRanges ranges (e.g. plain lists).
+ranges_identical <- function(a, b) {
+  if (!identical(duck_names(a), duck_names(b))) return(FALSE)
+  if (length(a) != length(b)) return(FALSE)
+  if (requireNamespace("GenomicRanges", quietly = TRUE) &&
+      methods::is(a, "GenomicRanges") && methods::is(b, "GenomicRanges")) {
+    return(identical(
+      as.character(GenomicRanges::granges(a)),
+      as.character(GenomicRanges::granges(b))
+    ))
+  }
+  isTRUE(all.equal(a, b))
 }
 
 S7::method(cbind, RangedSummarizedExperiment7) <- function(..., deparse.level = 1) {
   objects <- list(...)
   ref_ranges <- objects[[1]]@row_ranges
   for (obj in objects) {
-    if (!isTRUE(all.equal(duck_names(obj@row_ranges), duck_names(ref_ranges))) ||
-      length(obj@row_ranges) != length(ref_ranges)) {
-      stop2("cbind: all objects must have identical rowRanges() identity (names/length)")
+    if (!ranges_identical(obj@row_ranges, ref_ranges)) {
+      stop2("cbind: all objects must have identical rowRanges()")
     }
   }
   new_assays <- if (any(!vapply(objects, function(o) is.null(o@assays), logical(1)))) {
@@ -209,9 +226,14 @@ S7::method(cbind, RangedSummarizedExperiment7) <- function(..., deparse.level = 
   } else {
     NULL
   }
+  merged_ranges <- ref_ranges
+  if (has_mcols(ref_ranges)) {
+    merged_mcols <- table_merge_cols(lapply(objects, function(o) get_mcols(o@row_ranges)))
+    merged_ranges <- set_mcols(ref_ranges, merged_mcols)
+  }
   RangedSummarizedExperiment7(
     assays = new_assays,
-    rowRanges = ref_ranges,
+    rowRanges = merged_ranges,
     colData = table_rbind(lapply(objects, function(o) o@col_data)),
     metadata = objects[[1]]@metadata
   )
