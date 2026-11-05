@@ -1,0 +1,115 @@
+---
+title: "SummarizedExperiment7: an experimental, agentically coded, biocspec-conformant S7 implementation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{SummarizedExperiment7: an experimental, agentically coded, biocspec-conformant S7 implementation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## What this package is
+
+`SummarizedExperiment7` is an **experimental** reimplementation of the
+`SummarizedExperiment`/`RangedSummarizedExperiment` data structures using
+the `S7` object system instead of Bioconductor's S4 classes.
+
+Two things make this package unusual, and worth stating plainly before using it:
+
+- **It was written agentically.** The class contracts, accessors,
+  validators, and tests were produced by an AI coding agent working from a
+  specification document rather than hand-written line by line by a
+  human. The code has been reviewed and exercised, but it has not had the
+  years of production use that the Bioconductor S4 `SummarizedExperiment`
+  has had.
+- **It targets a specification, not the S4 source.** Rather than porting
+  Bioconductor's S4 implementation, this package was built to conform to
+  [biocspec](https://github.com/vjcitn/BOSS/tree/main/biocspec)'s
+  language-agnostic specification for `SummarizedExperiment`
+  (`SummarizedExperiment-specification.md`). That specification describes
+  the *contract* -- what a constructor, accessor, or combining operation
+  must guarantee -- independent of R, S4, or any particular language's
+  object system. biocspec also ships a formal conformance test suite
+  (`summarized_experiment_conformance.yaml`); this package includes an
+  adapted runner for it (`conformance/run_conformance_se7.R`) covering the
+  cases that are in scope for its API (see below).
+
+Treat this package as a demonstration that a biocspec-conformant
+`SummarizedExperiment` can be built outside of S4, not as a drop-in
+replacement for the Bioconductor class.
+
+## Deliberate differences from the S4 original
+
+A handful of S4 behaviors are intentionally not replicated, because they
+are implementation details rather than requirements of the biocspec
+contract:
+
+- No automatic class promotion/demotion when assigning to `rowRanges<-`;
+  use `toRangedSummarizedExperiment7()`/`toSummarizedExperiment7()`
+  instead.
+- No `withDimnames=`/`checkDimnames=` constructor and accessor arguments.
+- No `combineRows()`/`combineCols()` with fill values, no range-algebra
+  delegation (`shift()`, `subsetByOverlaps()`, ...), no `seqinfo()`
+  pruning.
+
+These are documented in the relevant `R/` source files and reflected in
+the conformance runner's "out of scope" list.
+
+## Converting a real Bioconductor object: the `airway` example
+
+The most common way to get data into `SummarizedExperiment7` from
+existing Bioconductor workflows is `asSummarizedExperiment7()`, which
+takes a real S4 `SummarizedExperiment`/`RangedSummarizedExperiment` and
+builds its S7 equivalent by reading off `assays()`, `rowRanges()`,
+`colData()`, and `metadata()`. This is a one-way, read-only snapshot --
+the result is not linked back to the original S4 object.
+
+```{r setup}
+library(SummarizedExperiment7)
+```
+
+```{r airway, eval = requireNamespace("airway", quietly = TRUE)}
+data(airway, package = "airway")
+airway
+
+se7 <- asSummarizedExperiment7(airway)
+se7
+class(se7)
+dim(se7)
+```
+
+The S7 object exposes the same core information through this package's
+own accessors:
+
+```{r accessors, eval = requireNamespace("airway", quietly = TRUE)}
+assayNames7(se7)
+head(assay7(se7, "counts")[, 1:3])
+head(colData7(se7))
+rowRanges7(se7)
+```
+
+Because `airway` is a `RangedSummarizedExperiment`, `asSummarizedExperiment7()`
+produced a `RangedSummarizedExperiment7`, whose per-feature identity comes
+from `rowRanges7()` (a real `GRanges`) rather than an independent
+`rowData`/`rowNames` pair:
+
+```{r ranged, eval = requireNamespace("airway", quietly = TRUE)}
+is(se7, "RangedSummarizedExperiment7")
+names(se7)[1:3]
+```
+
+Ordinary `SummarizedExperiment7` operations -- subsetting, `rbind()`,
+`cbind()` -- work on the result exactly as they would on an object built
+directly with `SummarizedExperiment7()`/`RangedSummarizedExperiment7()`:
+
+```{r subset, eval = requireNamespace("airway", quietly = TRUE)}
+se7[1:5, 1:2]
+```
+
+## What `asSummarizedExperiment7()` is not
+
+`asSummarizedExperiment7()` converts *from* the S4 world *into* this
+package. It is a different operation from
+`toSummarizedExperiment7()`/`toRangedSummarizedExperiment7()`, which move
+between this package's own two S7 classes and will error if given an S4
+object -- see their documentation for details. There is no S7-to-S4
+inverse in this package.

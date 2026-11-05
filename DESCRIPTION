@@ -25,6 +25,10 @@ Suggests:
     testthat (>= 3.0.0),
     S4Vectors,
     GenomicRanges,
-    SummarizedExperiment
+    SummarizedExperiment,
+    airway,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.1
