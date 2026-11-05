@@ -236,3 +236,14 @@ S7 commit found, the biocspec conformance comparison in the table above
 is based on reading its source (`R/SummarizedExperiment-class.R`,
 `R/Assays-class.R`, `R/RangedSummarizedExperiment-class.R`), not on
 executing its own test suite or the conformance runner against it.
+
+As a check that the `base::`-qualified fix above is not itself a
+regression, `SummarizedExperiment7` was also re-verified with the S7
+fork uninstalled and the released CRAN S7 0.2.2 reinstalled in its
+place: the same 62/62 testthat tests and 16/16 in-scope conformance
+cases pass, and `R CMD check --as-cran --no-manual` returns to exactly
+the pre-fork state of 1 WARNING (the inherent `.Internal()` call in
+`cbind`/`rbind`, specific to CRAN S7 0.2.2's dispatch mechanism) + 1
+NOTE. The `base::` qualification is therefore safe under both S7
+versions; the S7 fork was then reinstalled to match the rest of this
+section.
