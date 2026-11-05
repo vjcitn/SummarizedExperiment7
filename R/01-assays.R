@@ -72,7 +72,7 @@ S7::method(length, Assays7) <- function(x) length(x@data)
 assays7_slice <- function(x, i, j) {
   sliced <- lapply(x@data, function(a) {
     extra <- rep(list(quote(expr = )), length(dim(a)) - 2L)
-    do.call(`[`, c(list(a, i, j), extra, list(drop = FALSE)))
+    do.call(base::`[`, c(list(a, i, j), extra, list(drop = FALSE)))
   })
   Assays7(data = sliced, assay_names = x@assay_names)
 }
@@ -96,7 +96,7 @@ assays7_bind <- function(objects, along_cols) {
   }
   all_names <- lapply(objects, function(obj) obj@assay_names)
   has_names <- !all(vapply(all_names, is.null, logical(1)))
-  bind_fun <- if (along_cols) cbind else rbind
+  bind_fun <- if (along_cols) base::cbind else base::rbind
   if (!has_names) {
     bound <- lapply(seq_len(len0), function(idx) {
       do.call(bind_fun, lapply(objects, function(obj) obj@data[[idx]]))

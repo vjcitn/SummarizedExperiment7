@@ -42,7 +42,7 @@ table_rbind <- function(dfs) {
     }
     out
   } else {
-    do.call(rbind, dfs)
+    do.call(base::rbind, dfs)
   }
 }
 

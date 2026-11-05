@@ -112,3 +112,127 @@ package. It is a different operation from
 between this package's own two S7 classes and will error if given an S4
 object -- see their documentation for details. There is no S7-to-S4
 inverse in this package.
+
+## Comparison to Bioconductor's own S7 migration
+
+Bioconductor's `SummarizedExperiment` package has its own in-progress S7
+migration, developed on the `s7-migration` branch of
+[lawremi/SummarizedExperiment](https://github.com/lawremi/SummarizedExperiment/tree/s7-migration).
+It is worth being explicit about how that effort differs from this
+package, since both use S7 to represent the same data structure but for
+different purposes.
+
+That branch migrates the *actual* Bioconductor package to be built on
+S7 internally, while remaining a fully backward-compatible S4 object for
+the roughly one thousand Bioconductor packages that depend on
+`SummarizedExperiment`'s S4 API. Concretely: its core object is
+constructed via `new_object(S7_object(), NAMES=..., elementMetadata=...,
+colData=..., assays=..., metadata=...)` and then wrapped into a real S4
+object by `new_SummarizedExperiment()`; every S7 generic (`rowData`,
+`colData`, `assays`, `assay`, `assayNames`, and their setters) is also
+registered as a formal S4 generic via a `setS4Generic()` helper, so
+existing `setMethod()`-based extensions in dependent packages keep
+working untouched. It retains the complete production feature set:
+`withDimnames=`/`checkDimnames=` arguments, `GenomicRanges`/
+`DelayedArray`/`HDF5Array`/`Seqinfo` integration, `findOverlaps()`/
+`nearest()`/`coverage()` methods, and the various
+`makeSummarizedExperimentFrom*()` constructors.
+
+`SummarizedExperiment7`, by contrast, is a small, standalone S7 class
+hierarchy with no S4 inheritance and no S4/S7 bridging. It was built to
+satisfy biocspec's language-agnostic contract rather than to be a
+drop-in replacement, and it deliberately omits the production features
+listed above (see "Deliberate differences from the S4 original").
+Its accessors are namespaced (`assay7()`, `colData7()`, ...)
+specifically so they never collide with the real package's API.
+
+| | `SummarizedExperiment7` (this package) | `lawremi/SummarizedExperiment@s7-migration` |
+|---|---|---|
+| Purpose | Demonstrate a biocspec-conformant SE built from scratch in S7 | Migrate the real Bioconductor package's internals to S7 |
+| Relationship to S4 | None -- pure S7, no S4 classes involved | Dual-natured: an S7 object wrapped as a real S4 object (`new_SummarizedExperiment()`) |
+| Backward compatibility | Not applicable -- new, namespaced API (`assay7()`, `colData7()`, ...) | Required -- every S7 generic is also registered as an S4 generic (`setS4Generic()`) so dependent packages' `setMethod()`s keep working |
+| `withDimnames=`/`checkDimnames=` | Not implemented | Implemented |
+| Range algebra (`shift()`, `subsetByOverlaps()`, `findOverlaps()`, `nearest()`, `coverage()`) | Not implemented | Implemented |
+| `DelayedArray`/`HDF5Array`/`Seqinfo` integration | Not implemented | Implemented |
+| `combineRows()`/`combineCols()` with fill | Not implemented | Not shown to be ported yet in the reviewed branch |
+| `rbind()` merges `colData` columns across objects | Yes (fixed this session; matches the real package's `.cbind.DataFrame(args, colData, "colData")`) | Yes |
+| `cbind()` merges `rowRanges` `mcols()` across objects | Yes (fixed this session) | Yes |
+| `cbind()` rejects mismatched range coordinates, not just names/length | Yes (fixed this session) | Yes (`.compare(lapply(args, rowRanges), TRUE)`) |
+| Code size (core class files) | ~3 files, a few hundred lines | ~2100 lines across `SummarizedExperiment-class.R`, `Assays-class.R`, `RangedSummarizedExperiment-class.R` alone |
+| S7 version required | Any released S7 (CRAN 0.2.2 tested) | An unreleased S7 fork/branch -- `R/acompat.R`/`R/Assays-class.R` call an `S4_contains()` helper and pass an S4 `classRepresentation` to `S7::new_class(parent=)`, neither of which CRAN S7 0.2.2 supports |
+| biocspec conformance suite applied | Yes, 16/16 in-scope cases pass (`inst/conformance/run_conformance_se7.R`) | Not executable against this branch -- see below (reviewed by reading source instead) |
+
+Three of the real defects fixed in this package during development
+(`rbind()` only keeping the first object's `colData` columns, `cbind()`
+not merging `rowRanges` `mcols()`, and `cbind()`'s range-compatibility
+check only comparing names/length instead of actual coordinates) turned
+out to match exactly how the canonical Bioconductor S7 migration
+implements the same three operations -- useful independent validation
+that the fixes were in the right direction.
+
+### Identifying and installing the matching S7 fork
+
+`lawremi/SummarizedExperiment@s7-migration`'s most recent commit at the
+time of writing (`f0689b1`, 2026-06-20 15:27:08 -0700) is titled "sync
+with S7 branch API changes," confirming it tracks an unreleased S7
+branch rather than a CRAN release. That branch turned out to be
+[RConsortium/S7@s4-extends-s7-compat-fixes](https://github.com/RConsortium/S7/tree/s4-extends-s7-compat-fixes).
+(Checked first: lawremi's own fork of S7, `lawremi/S7@local_fixes`,
+which is older, 2024-era, and does not have the features `acompat.R`
+needs.) The tip of that branch at the time of writing,
+`c582779b4aa8cd1b50c4ca45e1e9b1083d342e04` ("Reduce S4 compatibility
+test duplication," 2026-06-25, version `0.2.2.9000`), was installed
+over the previously installed CRAN S7 0.2.2 and does supply the
+`S4_contains()` helper and S4-`classRepresentation`-as-`parent` support
+that `s7-migration`'s `R/acompat.R` needs -- but with it installed,
+`lawremi/SummarizedExperiment@s7-migration` still fails to load, now at
+`R/Assays-class.R`: `Error in S4_contains(class): S4 classes can not
+extend abstract S7 classes.` (`Assays` is declared
+`new_class(..., abstract = TRUE)` and then run through
+`setS4Class()`/`S4_contains()`.)
+
+That restriction was added to the S7 branch by commit `02a5348`
+("Fix S4 bridge review findings," 2026-06-24 09:14:37 -0400) and has
+held unchanged through `c582779` (the tip). The commit that originally
+introduced `S4_contains()`, `e75b66b` (2026-06-20 14:58:46 -0700), and
+the next one after it, `abf31be` ("fix regression from introduction of
+external generics," 2026-06-20 15:26:01 -0700 -- by Michael Lawrence,
+just 67 seconds before `s7-migration`'s own sync commit, and almost
+certainly the actual commit it was synced against), both predate that
+restriction -- but neither installs into a loadable package on its own
+(`R CMD INSTALL` succeeds, but the freshly installed package fails
+`.onLoad` with `no applicable method for` `` `@` `` `` applied to an
+object of class "S7_S3_class"` ``), because the S7 branch was mid-way
+through a larger internal refactor ("massive simplification" of its
+S3/S4 class representation, commit `67e88ae`) at that exact point in
+its history. In other words: there is no commit of
+`RConsortium/S7@s4-extends-s7-compat-fixes` that is *both* installable
+and compatible with `s7-migration`'s current `Assays-class.R` -- the
+window where `S4_contains()` existed without the abstract-class
+restriction was also a window where the package itself didn't load.
+This is a real, present incompatibility between the two branches at
+their respective current tips, not a mistake in fork selection; S7's
+own installed copy was left at the loadable, restriction-bearing
+`c582779`, since that is what `SummarizedExperiment7` itself was
+verified against (below).
+
+Installing `c582779` also surfaced and fixed two latent bugs in
+`SummarizedExperiment7` itself: that commit's revised method-dispatch
+mechanism represents `rbind`/`cbind`/`` `[` `` as non-function
+`S7_external_generic` sentinel objects in a package's namespace
+(instead of literally re-binding base's own closures there, as CRAN S7
+0.2.2 did), and two internal helpers (`assays7_bind()` in
+`R/01-assays.R`, `table_rbind()` in `R/00-table-helpers.R`) had passed
+the bare symbol to `do.call()`, which fetches the binding directly and
+received the inert sentinel rather than a usable function. Both now
+call `base::rbind()`/`base::cbind()`/`` base::`[` `` explicitly. This
+also happens to be what resolves the ".Internal calls in cbind/rbind"
+`R CMD check` WARNING noted elsewhere in this vignette's development
+history -- the newer S7 fork's sentinel-based dispatch no longer
+exposes literal `.Internal()`-calling closures under those names.
+
+Because `s7-migration` cannot currently be loaded under any installable
+S7 commit found, the biocspec conformance comparison in the table above
+is based on reading its source (`R/SummarizedExperiment-class.R`,
+`R/Assays-class.R`, `R/RangedSummarizedExperiment-class.R`), not on
+executing its own test suite or the conformance runner against it.
