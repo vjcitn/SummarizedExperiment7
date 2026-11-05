@@ -222,8 +222,9 @@ se7[1:5, 1:2]
 ## What `asSummarizedExperiment7()` is not
 
 [`asSummarizedExperiment7()`](https://vjcitn.github.io/SummarizedExperiment7/reference/asSummarizedExperiment7.md)
-converts *from* the S4 world *into* this package. It is a different
-operation from
+converts an S4 object *into* an instance of this package’s own
+`SummarizedExperiment7`/`RangedSummarizedExperiment7` classes. It is a
+different operation from
 [`toSummarizedExperiment7()`](https://vjcitn.github.io/SummarizedExperiment7/reference/toRangedSummarizedExperiment7.md)/[`toRangedSummarizedExperiment7()`](https://vjcitn.github.io/SummarizedExperiment7/reference/toRangedSummarizedExperiment7.md),
 which move between this package’s own two S7 classes and will error if
 given an S4 object – see their documentation for details. There is no

@@ -239,8 +239,10 @@ as they would on an object built directly with
 <div class="section level2">
 <h2 id="what-assummarizedexperiment7-is-not">What <code>asSummarizedExperiment7()</code> is not<a class="anchor" aria-label="anchor" href="#what-assummarizedexperiment7-is-not"></a>
 </h2>
-<p><code><a href="../reference/asSummarizedExperiment7.html">asSummarizedExperiment7()</a></code> converts <em>from</em> the S4
-world <em>into</em> this package. It is a different operation from
+<p><code><a href="../reference/asSummarizedExperiment7.html">asSummarizedExperiment7()</a></code> converts an S4 object
+<em>into</em> an instance of this package’s own
+<code>SummarizedExperiment7</code>/<code>RangedSummarizedExperiment7</code>
+classes. It is a different operation from
 <code><a href="../reference/toRangedSummarizedExperiment7.html">toSummarizedExperiment7()</a></code>/<code><a href="../reference/toRangedSummarizedExperiment7.html">toRangedSummarizedExperiment7()</a></code>,
 which move between this package’s own two S7 classes and will error if
 given an S4 object – see their documentation for details. There is no

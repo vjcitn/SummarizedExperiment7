@@ -106,8 +106,9 @@ se7[1:5, 1:2]
 
 ## What `asSummarizedExperiment7()` is not
 
-`asSummarizedExperiment7()` converts *from* the S4 world *into* this
-package. It is a different operation from
+`asSummarizedExperiment7()` converts an S4 object *into* an instance of
+this package's own `SummarizedExperiment7`/`RangedSummarizedExperiment7`
+classes. It is a different operation from
 `toSummarizedExperiment7()`/`toRangedSummarizedExperiment7()`, which move
 between this package's own two S7 classes and will error if given an S4
 object -- see their documentation for details. There is no S7-to-S4
