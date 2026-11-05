@@ -32,6 +32,12 @@ test_that("toRangedSummarizedExperiment7()/toSummarizedExperiment7() round-trip 
   expect_false(S7::S7_inherits(back, RangedSummarizedExperiment7))
 })
 
+test_that("toSummarizedExperiment7()/toRangedSummarizedExperiment7() reject non-S7 input instead of silently passing it through", {
+  expect_error(toSummarizedExperiment7(1:3))
+  expect_error(toSummarizedExperiment7(list(a = 1)))
+  expect_error(toRangedSummarizedExperiment7(1:3, rowRanges = list(1, 2)))
+})
+
 test_that("rowRanges7<- requires matching length and does not promote/demote the class", {
   rse <- RangedSummarizedExperiment7(assays = m1, rowRanges = list(1, 2))
   rowRanges7(rse) <- list(10, 20)

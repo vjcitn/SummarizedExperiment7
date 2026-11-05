@@ -16,7 +16,10 @@ Builds a \code{\link[=SummarizedExperiment7]{SummarizedExperiment7()}} (or, if \
 \code{SummarizedExperiment}/\code{RangedSummarizedExperiment} S4 object, by reading
 off \code{assays()}, \code{rowData()}/\code{rowRanges()}, \code{colData()}, and \code{metadata()}.
 This is a one-way, read-only snapshot: the result does not stay linked to
-\code{x}, and there is no S7-to-S4 inverse in this package.
+\code{x}, and there is no S7-to-S4 inverse in this package. Note that
+\code{\link[=toSummarizedExperiment7]{toSummarizedExperiment7()}}/\code{\link[=toRangedSummarizedExperiment7]{toRangedSummarizedExperiment7()}} are a
+different operation (moving between this package's own two S7 classes);
+pass an S4 object to \emph{this} function, not to those.
 }
 \examples{
 if (requireNamespace("SummarizedExperiment", quietly = TRUE)) {

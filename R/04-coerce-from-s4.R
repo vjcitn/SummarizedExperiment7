@@ -10,7 +10,10 @@
 #' `SummarizedExperiment`/`RangedSummarizedExperiment` S4 object, by reading
 #' off `assays()`, `rowData()`/`rowRanges()`, `colData()`, and `metadata()`.
 #' This is a one-way, read-only snapshot: the result does not stay linked to
-#' `x`, and there is no S7-to-S4 inverse in this package.
+#' `x`, and there is no S7-to-S4 inverse in this package. Note that
+#' [toSummarizedExperiment7()]/[toRangedSummarizedExperiment7()] are a
+#' different operation (moving between this package's own two S7 classes);
+#' pass an S4 object to *this* function, not to those.
 #'
 #' @param x A `SummarizedExperiment` or `RangedSummarizedExperiment` S4
 #'   object, as defined by the Bioconductor `SummarizedExperiment` package.

@@ -225,7 +225,10 @@ S7::method(cbind, RangedSummarizedExperiment7) <- function(..., deparse.level = 
 #' and `toSummarizedExperiment()` methods (clauses `RSE-COERCE-1`/`RSE-COERCE-2`).
 #' Unlike the R/S4 original, assigning to `rowRanges7<-` never implicitly
 #' changes an object's class; these functions are the only way to move
-#' between the two classes.
+#' between the two classes. `x` must already be one of this package's S7
+#' classes — to convert a Bioconductor S4 `SummarizedExperiment` or
+#' `RangedSummarizedExperiment` object, use [asSummarizedExperiment7()]
+#' first (these functions error if `x` is not already S7).
 #'
 #' @param x A `SummarizedExperiment7` (for `toRangedSummarizedExperiment7()`)
 #'   or `RangedSummarizedExperiment7` (for `toSummarizedExperiment7()`).
@@ -241,6 +244,12 @@ S7::method(cbind, RangedSummarizedExperiment7) <- function(..., deparse.level = 
 #'
 #' @export
 toRangedSummarizedExperiment7 <- function(x, rowRanges) {
+  if (!S7::S7_inherits(x, SummarizedExperiment7)) {
+    stop2(
+      "`x` must be a SummarizedExperiment7 or RangedSummarizedExperiment7; ",
+      "for a Bioconductor S4 object, convert it first with asSummarizedExperiment7()"
+    )
+  }
   if (S7::S7_inherits(x, RangedSummarizedExperiment7)) return(x)
   if (length(rowRanges) != nrow(x)) {
     stop2("length(rowRanges) must equal nrow(x)")
@@ -256,6 +265,12 @@ toRangedSummarizedExperiment7 <- function(x, rowRanges) {
 #' @rdname toRangedSummarizedExperiment7
 #' @export
 toSummarizedExperiment7 <- function(x) {
+  if (!S7::S7_inherits(x, SummarizedExperiment7)) {
+    stop2(
+      "`x` must be a SummarizedExperiment7 or RangedSummarizedExperiment7; ",
+      "for a Bioconductor S4 object, convert it first with asSummarizedExperiment7()"
+    )
+  }
   if (!S7::S7_inherits(x, RangedSummarizedExperiment7)) return(x)
   SummarizedExperiment7(
     assays = x@assays,

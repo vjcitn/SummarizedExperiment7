@@ -21,7 +21,10 @@ Explicit coercion functions, matching biocspec's \code{toRangedSummarizedExperim
 and \code{toSummarizedExperiment()} methods (clauses \code{RSE-COERCE-1}/\code{RSE-COERCE-2}).
 Unlike the R/S4 original, assigning to \verb{rowRanges7<-} never implicitly
 changes an object's class; these functions are the only way to move
-between the two classes.
+between the two classes. \code{x} must already be one of this package's S7
+classes — to convert a Bioconductor S4 \code{SummarizedExperiment} or
+\code{RangedSummarizedExperiment} object, use \code{\link[=asSummarizedExperiment7]{asSummarizedExperiment7()}}
+first (these functions error if \code{x} is not already S7).
 }
 \examples{
 se <- SummarizedExperiment7(assays = matrix(1:6, 2, 3), rowNames = c("g1", "g2"))
