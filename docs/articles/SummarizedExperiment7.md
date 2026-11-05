@@ -360,6 +360,24 @@ is based on reading its source (`R/SummarizedExperiment-class.R`,
 `R/Assays-class.R`, `R/RangedSummarizedExperiment-class.R`), not on
 executing its own test suite or the conformance runner against it.
 
+The branch’s own
+[`S7-migration-notes.md`](https://github.com/lawremi/SummarizedExperiment/blob/s7-migration/S7-migration-notes.md)
+independently confirms this is expected at this stage, not specific to
+the S7 commit tried here: it lists the S4/S7 constructor boundary as
+unsettled (“full constructor validity remains something to revisit once
+the S4/S7 construction boundary settles”), describes a constructor-time
+[`dimnames()`](https://rdrr.io/r/base/dimnames.html) call that could
+recurse the C stack “through the half-migrated S4/S7 dispatch stack” and
+had to be routed around, and flags an open S7/`methods` issue where
+`validObject()`’s recursive S4-superclass validation reaches a stripped
+`RectangularVector` slice that no longer has `assays`/`colData`, so
+`RectangularData`’s inherited validity can’t compute `dim(x)`. Several
+of these (construction via S4 shim classes, `RectangularData` entering
+the inheritance chain through a `RectangularVector` bridge, slot
+prototypes being an S7-registration responsibility) are exactly the kind
+of two-way S4/S7 bridging work that `SummarizedExperiment7` avoids
+entirely by not inheriting from S4 at all.
+
 As a check that the `base::`-qualified fix above is not itself a
 regression, `SummarizedExperiment7` was also re-verified with the S7
 fork uninstalled and the released CRAN S7 0.2.2 reinstalled in its
