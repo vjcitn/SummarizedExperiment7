@@ -104,6 +104,17 @@ se7_constructor <- function(
 #' @param rowNames Optional character vector of feature identifiers
 #'   (`[[NAMES]]` in the specification); independent of `rowData`.
 #'
+#' @examples
+#' m <- matrix(1:6, nrow = 2, ncol = 3, dimnames = list(c("g1", "g2"), c("s1", "s2", "s3")))
+#' se <- SummarizedExperiment7(
+#'   assays = list(counts = m),
+#'   colData = data.frame(group = c("a", "a", "b"), row.names = c("s1", "s2", "s3"))
+#' )
+#' se
+#' dim(se)
+#' rownames(se)
+#' colData7(se)
+#'
 #' @export
 SummarizedExperiment7 <- S7::new_class(
   "SummarizedExperiment7",
@@ -143,6 +154,18 @@ S7::method(`names<-`, SummarizedExperiment7) <- function(x, value) {
 
 ## ---- Assay accessors & mutators (clause SE-ASSAY-1) -----------------------
 
+#' Get or set the list of assays
+#'
+#' @param x A `SummarizedExperiment7`.
+#' @param value Replacement assays: a matrix, list/named list of matrices,
+#'   or an `Assays7` object.
+#'
+#' @examples
+#' se <- SummarizedExperiment7(assays = list(counts = matrix(1:6, 2, 3)))
+#' assays7(se)
+#' assays7(se) <- list(counts = matrix(1:6, 2, 3), logcounts = matrix(7:12, 2, 3))
+#' assayNames7(se)
+#'
 #' @export
 assays7 <- S7::new_generic("assays7", "x")
 S7::method(assays7, SummarizedExperiment7) <- function(x) {
@@ -154,6 +177,7 @@ S7::method(assays7, SummarizedExperiment7) <- function(x) {
   }
 }
 
+#' @rdname assays7
 #' @export
 `assays7<-` <- S7::new_generic("assays7<-", "x")
 S7::method(`assays7<-`, SummarizedExperiment7) <- function(x, value) {
@@ -161,6 +185,20 @@ S7::method(`assays7<-`, SummarizedExperiment7) <- function(x, value) {
   x
 }
 
+#' Get or set a single assay by position or name
+#'
+#' @param x A `SummarizedExperiment7`.
+#' @param i Assay position (integer) or name (character); defaults to `1L`,
+#'   the first assay.
+#' @param value Replacement matrix for the `i`-th (or named) assay.
+#'
+#' @examples
+#' se <- SummarizedExperiment7(assays = list(counts = matrix(1:6, 2, 3)))
+#' assay7(se)
+#' assay7(se, "counts")
+#' assay7(se, "logcounts") <- log1p(assay7(se, "counts"))
+#' assayNames7(se)
+#'
 #' @export
 assay7 <- S7::new_generic("assay7", "x")
 S7::method(assay7, SummarizedExperiment7) <- function(x, i = 1L) {
@@ -172,6 +210,7 @@ S7::method(assay7, SummarizedExperiment7) <- function(x, i = 1L) {
   x@assays@data[[idx]]
 }
 
+#' @rdname assay7
 #' @export
 `assay7<-` <- S7::new_generic("assay7<-", "x")
 S7::method(`assay7<-`, SummarizedExperiment7) <- function(x, i = 1L, value) {
@@ -194,6 +233,14 @@ S7::method(`assay7<-`, SummarizedExperiment7) <- function(x, i = 1L, value) {
   x
 }
 
+#' Get the names of the assays
+#'
+#' @param x A `SummarizedExperiment7`.
+#'
+#' @examples
+#' se <- SummarizedExperiment7(assays = list(counts = matrix(1:6, 2, 3)))
+#' assayNames7(se)
+#'
 #' @export
 assayNames7 <- S7::new_generic("assayNames7", "x")
 S7::method(assayNames7, SummarizedExperiment7) <- function(x) {
@@ -204,10 +251,21 @@ S7::method(assayNames7, SummarizedExperiment7) <- function(x) {
 
 ## ---- Row, column, and experiment metadata (clauses SE-ROW/SE-COL/SE-META) --
 
+#' Get or set the per-feature (row) annotation table
+#'
+#' @param x A `SummarizedExperiment7`.
+#' @param value Replacement `data.frame`, one row per feature.
+#'
+#' @examples
+#' se <- SummarizedExperiment7(assays = list(counts = matrix(1:6, 2, 3)))
+#' rowData7(se) <- data.frame(gene_biotype = c("protein_coding", "lncRNA"))
+#' rowData7(se)
+#'
 #' @export
 rowData7 <- S7::new_generic("rowData7", "x")
 S7::method(rowData7, SummarizedExperiment7) <- function(x) x@row_data
 
+#' @rdname rowData7
 #' @export
 `rowData7<-` <- S7::new_generic("rowData7<-", "x")
 S7::method(`rowData7<-`, SummarizedExperiment7) <- function(x, value) {
@@ -215,10 +273,23 @@ S7::method(`rowData7<-`, SummarizedExperiment7) <- function(x, value) {
   x
 }
 
+#' Get or set the per-sample (column) annotation table
+#'
+#' @param x A `SummarizedExperiment7`.
+#' @param value Replacement `data.frame`, one row per sample;
+#'   `rownames(value)` become `colnames(x)` when supplied.
+#'
+#' @examples
+#' se <- SummarizedExperiment7(assays = list(counts = matrix(1:6, 2, 3)))
+#' colData7(se) <- data.frame(group = c("a", "a", "b"), row.names = c("s1", "s2", "s3"))
+#' colData7(se)
+#' colnames(se)
+#'
 #' @export
 colData7 <- S7::new_generic("colData7", "x")
 S7::method(colData7, SummarizedExperiment7) <- function(x) x@col_data
 
+#' @rdname colData7
 #' @export
 `colData7<-` <- S7::new_generic("colData7<-", "x")
 S7::method(`colData7<-`, SummarizedExperiment7) <- function(x, value) {
@@ -228,10 +299,21 @@ S7::method(`colData7<-`, SummarizedExperiment7) <- function(x, value) {
   x
 }
 
+#' Get or set experiment-wide metadata
+#'
+#' @param x A `SummarizedExperiment7`.
+#' @param value Replacement named list.
+#'
+#' @examples
+#' se <- SummarizedExperiment7(assays = list(counts = matrix(1:6, 2, 3)))
+#' metadata7(se) <- list(study = "demo")
+#' metadata7(se)
+#'
 #' @export
 metadata7 <- S7::new_generic("metadata7", "x")
 S7::method(metadata7, SummarizedExperiment7) <- function(x) x@metadata
 
+#' @rdname metadata7
 #' @export
 `metadata7<-` <- S7::new_generic("metadata7<-", "x")
 S7::method(`metadata7<-`, SummarizedExperiment7) <- function(x, value) {

@@ -58,6 +58,16 @@ rse7_constructor <- function(
 #'   vector also works for the purposes of this demonstration package.
 #' @inheritParams SummarizedExperiment7
 #'
+#' @examples
+#' m <- matrix(1:6, nrow = 2, ncol = 3, dimnames = list(c("g1", "g2"), c("s1", "s2", "s3")))
+#' rse <- RangedSummarizedExperiment7(
+#'   assays = m,
+#'   rowRanges = list(g1 = 1:10, g2 = 11:20)
+#' )
+#' rse
+#' dim(rse)
+#' rowRanges7(rse)
+#'
 #' @export
 RangedSummarizedExperiment7 <- S7::new_class(
   "RangedSummarizedExperiment7",
@@ -84,10 +94,27 @@ duck_names <- function(r) {
 
 ## ---- rowRanges accessor/mutator (clause RSE-DELEGATE-1) -------------------
 
+#' Get or set the per-feature ranges of a `RangedSummarizedExperiment7`
+#'
+#' @param x A `RangedSummarizedExperiment7`.
+#' @param value Replacement ranges; `length(value)` must equal `nrow(x)`.
+#'   Reassigning never changes the object's class (see
+#'   [toRangedSummarizedExperiment7()]).
+#'
+#' @examples
+#' rse <- RangedSummarizedExperiment7(
+#'   assays = matrix(1:6, 2, 3),
+#'   rowRanges = list(1:10, 11:20)
+#' )
+#' rowRanges7(rse)
+#' rowRanges7(rse) <- list(100:110, 200:220)
+#' rowRanges7(rse)
+#'
 #' @export
 rowRanges7 <- S7::new_generic("rowRanges7", "x")
 S7::method(rowRanges7, RangedSummarizedExperiment7) <- function(x) x@row_ranges
 
+#' @rdname rowRanges7
 #' @export
 `rowRanges7<-` <- S7::new_generic("rowRanges7<-", "x")
 S7::method(`rowRanges7<-`, RangedSummarizedExperiment7) <- function(x, value) {
@@ -204,6 +231,13 @@ S7::method(cbind, RangedSummarizedExperiment7) <- function(..., deparse.level = 
 #'   or `RangedSummarizedExperiment7` (for `toSummarizedExperiment7()`).
 #' @param rowRanges The `rowRanges7` to attach; its length must equal
 #'   `nrow(x)`.
+#'
+#' @examples
+#' se <- SummarizedExperiment7(assays = matrix(1:6, 2, 3), rowNames = c("g1", "g2"))
+#' rse <- toRangedSummarizedExperiment7(se, rowRanges = list(1:10, 11:20))
+#' rse
+#' back <- toSummarizedExperiment7(rse)
+#' back
 #'
 #' @export
 toRangedSummarizedExperiment7 <- function(x, rowRanges) {

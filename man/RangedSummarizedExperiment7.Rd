@@ -31,3 +31,14 @@ interface: a \code{SummarizedExperiment7} whose per-feature identity and
 metadata are anchored to \code{rowRanges} rather than an independent
 \code{rowData}/\code{rowNames} pair (clause \code{RSE-INV-3}).
 }
+\examples{
+m <- matrix(1:6, nrow = 2, ncol = 3, dimnames = list(c("g1", "g2"), c("s1", "s2", "s3")))
+rse <- RangedSummarizedExperiment7(
+  assays = m,
+  rowRanges = list(g1 = 1:10, g2 = 11:20)
+)
+rse
+dim(rse)
+rowRanges7(rse)
+
+}

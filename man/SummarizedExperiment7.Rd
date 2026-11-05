@@ -32,3 +32,15 @@ An S7 implementation of the biocspec \code{SummarizedExperiment} interface:
 a container coordinating one or more matrix-like assays with row
 ("feature") and column ("sample") metadata tables.
 }
+\examples{
+m <- matrix(1:6, nrow = 2, ncol = 3, dimnames = list(c("g1", "g2"), c("s1", "s2", "s3")))
+se <- SummarizedExperiment7(
+  assays = list(counts = m),
+  colData = data.frame(group = c("a", "a", "b"), row.names = c("s1", "s2", "s3"))
+)
+se
+dim(se)
+rownames(se)
+colData7(se)
+
+}

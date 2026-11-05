@@ -23,3 +23,11 @@ Unlike the R/S4 original, assigning to \verb{rowRanges7<-} never implicitly
 changes an object's class; these functions are the only way to move
 between the two classes.
 }
+\examples{
+se <- SummarizedExperiment7(assays = matrix(1:6, 2, 3), rowNames = c("g1", "g2"))
+rse <- toRangedSummarizedExperiment7(se, rowRanges = list(1:10, 11:20))
+rse
+back <- toSummarizedExperiment7(rse)
+back
+
+}
